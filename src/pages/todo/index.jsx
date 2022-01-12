@@ -1,19 +1,31 @@
 import axios from "axios";
 import React, { Component } from "react";
 import { BsPlusCircle } from "react-icons/bs";
-import Todo from "../components/todo";
+import Moment from "react-moment";
+import Todo from "../../components/todo";
+import Form from "../../components/form";
+import { withRouter } from "../../utils/navigation";
 
-export default class index extends Component {
-  state = {
-    isReady: false,
-    inputTask: "",
-    todo: [],
-    editMode: false,
-    selected: {},
-  };
+class index extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isReady: false,
+      inputTask: "",
+      inputDesc: "",
+      todo: [],
+      editMode: false,
+      selected: {},
+      currentDateTime: Date().toLocaleString(),
+    };
+  }
 
   componentDidMount() {
     this.fetchData();
+  }
+
+  componentWillReceiveProps(props) {
+    props.data !== "" ? this.requestSearch(props.data) : this.fetchData();
   }
 
   async fetchData() {
@@ -23,7 +35,6 @@ export default class index extends Component {
       .then((res) => {
         const { data } = res;
         this.setState({ todo: data });
-        console.log(data);
       })
       .catch((err) => {
         console.log(err);
@@ -34,19 +45,19 @@ export default class index extends Component {
   async handleSubmit(e) {
     e.preventDefault();
     this.setState({ isReady: false });
+    const body = {
+      content: this.state.inputTask,
+      description: this.state.inputDesc,
+    };
     axios
-      .post("/tasks", { content: this.state.inputTask })
+      .post("/tasks", body)
       .then((res) => {
         const { data } = res;
         this.setState({ todo: data });
-        console.log(data);
+        this.fetchData();
       })
       .catch((err) => {
         console.log(err);
-      })
-      .finally(() => {
-        window.location = "/";
-        this.setState({ isReady: true });
       });
   }
 
@@ -55,8 +66,6 @@ export default class index extends Component {
     axios
       .delete(`/tasks/${item.id}`)
       .then((res) => {
-        const { data } = res;
-        console.log(data);
         this.fetchData();
       })
       .catch((err) => {
@@ -71,45 +80,54 @@ export default class index extends Component {
       .then((res) => {
         const { data } = res;
         this.setState({ todo: data });
-        console.log(data);
+        this.fetchData();
       })
       .catch((err) => {
         console.log(err);
-      })
-      .finally(() => {
-        window.location = "/";
-        this.setState({ isReady: true });
       });
   }
 
   async handleEdit(e) {
     e.preventDefault();
     this.setState({ isReady: false });
+    const body = {
+      content: this.state.inputTask,
+      description: this.state.inputDesc,
+    };
     axios
-      .post(`/tasks/${this.state.selected.id}`, {
-        content: this.state.inputTask,
-      })
+      .post(`/tasks/${this.state.selected.id}`, body)
       .then((res) => {
         const { data } = res;
         this.setState({ todo: data });
-        console.log(data);
+        this.fetchData();
       })
       .catch((err) => {
         console.log(err);
-      })
-      .finally(() => {
-        window.location = "/";
-        this.setState({ isReady: true });
       });
+  }
+
+  handleDetail(item) {
+    this.props.navigate(`/todo/${item.id}`);
+  }
+
+  requestSearch(searchValue) {
+    const searchRegex = new RegExp(searchValue, "i");
+    const filterRows = this.state.todo.filter(function (el) {
+      return searchRegex.test(el.content);
+    });
+    this.setState({ todo: filterRows });
+    console.log(this.state.todo);
   }
 
   render() {
     return (
       <div id="index">
-        <div className="container p-lg-4 pb-5 mb-5">
+        <div className="container p-lg-4 py-4 mb-5">
           <h1 className="fs-4 fw-bolder">Today</h1>
           <p className="my-3 text-muted">
-            <small>Monday, Januari 10, 2022</small>
+            <Moment format="LL" element="small">
+              {this.state.currentDateTime}
+            </Moment>
           </p>
           {this.state.isReady ? (
             this.state.todo.map((item) => {
@@ -117,16 +135,17 @@ export default class index extends Component {
                 <Todo
                   key={item.id}
                   task={item.content}
-                  isFinish={item.completed}
                   onClickDelete={() => this.handleDelete(item)}
                   onClickComplete={() => this.handleComplete(item)}
                   onClickEdit={() =>
                     this.setState({
                       inputTask: item.content,
+                      inputDesc: item.description,
                       editMode: true,
                       selected: item,
                     })
                   }
+                  onClickDetail={() => this.handleDetail(item)}
                 />
               );
             })
@@ -140,10 +159,12 @@ export default class index extends Component {
               </div>
             </div>
           )}
-          <div className="d-flex ms-3 align-items-center py-2">
+          <div className="d-flex ms-4 align-items-center py-2">
             <a
-              className="btn fs-5"
-              onClick={() => this.setState({ inputTask: "", editMode: false })}
+              className="text-decoration-none text-dark fs-5"
+              onClick={() =>
+                this.setState({ inputTask: "", editMode: false, inputDesc: "" })
+              }
               data-bs-toggle="collapse"
               href="#collapseExample"
               role="button"
@@ -155,46 +176,22 @@ export default class index extends Component {
           </div>
           <div className="collapse" id="collapseExample">
             <div className="card card-body border-0">
-              <form
+              <Form
+                inputTask={this.state.inputTask}
+                inputDesc={this.state.inputDesc}
+                onChangeTask={(e) =>
+                  this.setState({ inputTask: e.target.value })
+                }
+                onChangeDesc={(e) =>
+                  this.setState({ inputDesc: e.target.value })
+                }
                 onSubmit={(e) =>
                   this.state.editMode
                     ? this.handleEdit(e)
                     : this.handleSubmit(e)
                 }
-                className="row g-3"
-              >
-                <div className="col-md-10">
-                  <textarea
-                    value={this.state.inputTask}
-                    onChange={(e) =>
-                      this.setState({ inputTask: e.target.value })
-                    }
-                    className="form-control"
-                    type="text"
-                    placeholder="enter your task"
-                    rows={3}
-                  />
-                </div>
-                <div className="col-md-2 d-grid gap-2">
-                  <button
-                    type="submit"
-                    disabled={!this.state.inputTask.length}
-                    className="btn btn-primary"
-                    data-bs-toggle="collapse"
-                    href="#collapseExample"
-                  >
-                    Submit
-                  </button>
-                  <button
-                    className="btn btn-light border"
-                    data-bs-toggle="collapse"
-                    href="#collapseExample"
-                    type="button"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
+                href={"#collapseExample"}
+              />
             </div>
           </div>
         </div>
@@ -202,3 +199,5 @@ export default class index extends Component {
     );
   }
 }
+
+export default withRouter(index);
