@@ -111,12 +111,21 @@ class index extends Component {
   }
 
   requestSearch(searchValue) {
-    const searchRegex = new RegExp(searchValue, "i");
-    const filterRows = this.state.todo.filter(function (el) {
-      return searchRegex.test(el.content);
-    });
-    this.setState({ todo: filterRows });
-    console.log(this.state.todo);
+    this.setState({ isReady: false });
+    axios
+      .get("/tasks")
+      .then((res) => {
+        const { data } = res;
+        const searchRegex = new RegExp(searchValue, "i");
+        const filterRows = data.filter(function (el) {
+          return searchRegex.test(el.content);
+        });
+        this.setState({ todo: filterRows });
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => this.setState({ isReady: true }));
   }
 
   render() {
