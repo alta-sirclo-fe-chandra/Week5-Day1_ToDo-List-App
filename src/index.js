@@ -11,7 +11,7 @@ import reportWebVitals from "./reportWebVitals";
 // initialize axios
 axios.defaults.baseURL = "https://api.todoist.com/rest/v1";
 axios.defaults.headers = {
-  Authorization: `Bearer 7406a0a5ca1dec58f84f137f67d237715bcc86af`,
+  Authorization: `Bearer 181227c00c9ef3f8595658dddfd94cfe2b4c4c5e`,
 };
 
 ReactDOM.render(

@@ -1,20 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
 import Navbar from "./components/navbar";
-import Index from "./pages/todo";
 
-function App() {
+const App = (props) => {
   const [data, setData] = useState("");
 
   const requestSearch = (data) => {
     setData(data);
   };
 
+  useEffect(() => {
+    props.requestSearch(data);
+  }, [data, props]);
+
   return (
     <div>
       <Navbar requestSearch={requestSearch} />
-      <Index data={data} />
+      <Outlet />
     </div>
   );
-}
+};
 
 export default App;

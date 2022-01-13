@@ -1,118 +1,110 @@
 import axios from "axios";
-import React, { Component } from "react";
 import { BsPlusCircle } from "react-icons/bs";
 import Moment from "react-moment";
 import Todo from "../../components/todo";
 import Form from "../../components/form";
-import { withRouter } from "../../utils/navigation";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-class index extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isReady: false,
-      inputTask: "",
-      inputDesc: "",
-      todo: [],
-      editMode: false,
-      selected: {},
-      currentDateTime: Date().toLocaleString(),
-    };
-  }
+const Index = (props) => {
+  const [isReady, setIsReady] = useState(false);
+  const [inputTask, setInputTask] = useState("");
+  const [inputDesc, setInputDesc] = useState("");
+  const [todo, setTodo] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [selected, setSelected] = useState({});
+  const currentDateTime = Date().toLocaleString();
+  const navigate = useNavigate();
 
-  componentDidMount() {
-    this.fetchData();
-  }
+  useEffect(() => {
+    props.searchValue !== "" ? requestSearch(props.searchValue) : fetchData();
+  }, [props.searchValue]);
 
-  componentWillReceiveProps(props) {
-    props.data !== "" ? this.requestSearch(props.data) : this.fetchData();
-  }
-
-  async fetchData() {
-    this.setState({ isReady: false });
-    axios
+  const fetchData = async () => {
+    setIsReady(false);
+    await axios
       .get("/tasks")
       .then((res) => {
         const { data } = res;
-        this.setState({ todo: data });
+        setTodo(data);
       })
       .catch((err) => {
         console.log(err);
       })
-      .finally(() => this.setState({ isReady: true }));
-  }
+      .finally(() => setIsReady(true));
+  };
 
-  async handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    this.setState({ isReady: false });
+    setIsReady(false);
     const body = {
-      content: this.state.inputTask,
-      description: this.state.inputDesc,
+      content: inputTask,
+      description: inputDesc,
     };
-    axios
+    await axios
       .post("/tasks", body)
       .then((res) => {
         const { data } = res;
-        this.setState({ todo: data });
-        this.fetchData();
+        setTodo(data);
+        fetchData();
       })
       .catch((err) => {
         console.log(err);
       });
-  }
+  };
 
-  async handleDelete(item) {
-    this.setState({ isReady: false });
-    axios
+  const handleDelete = async (item) => {
+    setIsReady(false);
+    await axios
       .delete(`/tasks/${item.id}`)
       .then((res) => {
-        this.fetchData();
+        fetchData();
       })
       .catch((err) => {
         console.log(err);
       });
-  }
+  };
 
-  async handleComplete(item) {
-    this.setState({ isReady: false });
-    axios
+  const handleComplete = async (item) => {
+    setIsReady(false);
+    await axios
       .post(`/tasks/${item.id}/close`)
       .then((res) => {
         const { data } = res;
-        this.setState({ todo: data });
-        this.fetchData();
+        setTodo(data);
+        fetchData();
       })
       .catch((err) => {
         console.log(err);
       });
-  }
+  };
 
-  async handleEdit(e) {
+  const handleEdit = async (e) => {
     e.preventDefault();
-    this.setState({ isReady: false });
+    setIsReady(false);
     const body = {
-      content: this.state.inputTask,
-      description: this.state.inputDesc,
+      content: inputTask,
+      description: inputDesc,
     };
-    axios
-      .post(`/tasks/${this.state.selected.id}`, body)
+    await axios
+      .post(`/tasks/${selected.id}`, body)
       .then((res) => {
         const { data } = res;
-        this.setState({ todo: data });
-        this.fetchData();
+        setTodo(data);
+        fetchData();
       })
       .catch((err) => {
         console.log(err);
       });
-  }
+  };
 
-  handleDetail(item) {
-    this.props.navigate(`/todo/${item.id}`);
-  }
+  const handleDetail = (item) => {
+    navigate(`/todo/${item.id}`);
+  };
 
-  requestSearch(searchValue) {
-    this.setState({ isReady: false });
-    axios
+  const requestSearch = async (searchValue) => {
+    setIsReady(false);
+    await axios
       .get("/tasks")
       .then((res) => {
         const { data } = res;
@@ -120,93 +112,81 @@ class index extends Component {
         const filterRows = data.filter(function (el) {
           return searchRegex.test(el.content);
         });
-        this.setState({ todo: filterRows });
+        setTodo(filterRows);
       })
       .catch((err) => {
         console.log(err);
       })
-      .finally(() => this.setState({ isReady: true }));
-  }
+      .finally(() => setIsReady(true));
+  };
 
-  render() {
-    return (
-      <div id="index">
-        <div className="container p-lg-4 py-4 mb-5">
-          <h1 className="fs-4 fw-bolder">Today</h1>
-          <p className="my-3 text-muted">
-            <Moment format="LL" element="small">
-              {this.state.currentDateTime}
-            </Moment>
-          </p>
-          {this.state.isReady ? (
-            this.state.todo.map((item) => {
-              return (
-                <Todo
-                  key={item.id}
-                  task={item.content}
-                  onClickDelete={() => this.handleDelete(item)}
-                  onClickComplete={() => this.handleComplete(item)}
-                  onClickEdit={() =>
-                    this.setState({
-                      inputTask: item.content,
-                      inputDesc: item.description,
-                      editMode: true,
-                      selected: item,
-                    })
-                  }
-                  onClickDetail={() => this.handleDetail(item)}
-                />
-              );
-            })
-          ) : (
-            <div className="w-100 d-flex justify-content-center">
-              <div class="lds-ellipsis">
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-              </div>
+  return (
+    <div id="index">
+      <div className="container p-lg-4 py-4 mb-5">
+        <h1 className="fs-4 fw-bolder">Today</h1>
+        <p className="my-3 text-muted">
+          <Moment format="LL" element="small">
+            {currentDateTime}
+          </Moment>
+        </p>
+        {isReady ? (
+          todo.map((item) => (
+            <Todo
+              key={item.id}
+              task={item.content}
+              onClickDelete={() => handleDelete(item)}
+              onClickComplete={() => handleComplete(item)}
+              onClickEdit={() => {
+                setInputTask(item.content);
+                setInputDesc(item.description);
+                setEditMode(true);
+                setSelected(item);
+              }}
+              onClickDetail={() => handleDetail(item)}
+            />
+          ))
+        ) : (
+          <div className="w-100 d-flex justify-content-center">
+            <div class="lds-ellipsis">
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
             </div>
-          )}
-          <div className="d-flex ms-4 align-items-center py-2">
-            <a
-              className="text-decoration-none text-dark fs-5"
-              onClick={() =>
-                this.setState({ inputTask: "", editMode: false, inputDesc: "" })
-              }
-              data-bs-toggle="collapse"
-              href="#collapseExample"
-              role="button"
-              aria-expanded="false"
-              aria-controls="collapseExample"
-            >
-              <BsPlusCircle /> <span className="fs-6 ms-3">Add Task</span>
-            </a>
           </div>
-          <div className="collapse" id="collapseExample">
-            <div className="card card-body border-0">
-              <Form
-                inputTask={this.state.inputTask}
-                inputDesc={this.state.inputDesc}
-                onChangeTask={(e) =>
-                  this.setState({ inputTask: e.target.value })
-                }
-                onChangeDesc={(e) =>
-                  this.setState({ inputDesc: e.target.value })
-                }
-                onSubmit={(e) =>
-                  this.state.editMode
-                    ? this.handleEdit(e)
-                    : this.handleSubmit(e)
-                }
-                href={"#collapseExample"}
-              />
-            </div>
+        )}
+        <div className="d-flex ms-4 align-items-center py-2">
+          <a
+            className="text-decoration-none text-dark fs-5"
+            onClick={() => {
+              setInputTask("");
+              setEditMode(false);
+              setInputDesc("");
+            }}
+            data-bs-toggle="collapse"
+            href="#collapseExample"
+            role="button"
+            aria-expanded="false"
+            aria-controls="collapseExample"
+          >
+            <BsPlusCircle /> <span className="fs-6 ms-3">Add Task</span>
+          </a>
+        </div>
+        <div className="collapse" id="collapseExample">
+          <div className="card card-body border-0">
+            <Form
+              inputTask={inputTask}
+              inputDesc={inputDesc}
+              onChangeTask={(e) => setInputTask(e.target.value)}
+              onChangeDesc={(e) => setInputDesc(e.target.value)}
+              onSubmit={(e) => (editMode ? handleEdit(e) : handleSubmit(e))}
+              href={"#collapseExample"}
+            />
           </div>
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
-export default withRouter(index);
+export default Index;

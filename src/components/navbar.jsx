@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { BsSearch } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
 import logo from "../assets/images/logo.svg";
 
-function Navbar(props) {
+const Navbar = (props) => {
   const [data, setData] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     props.requestSearch(data);
+    navigate(`/todo`);
   };
 
   return (
@@ -45,6 +48,6 @@ function Navbar(props) {
       </div>
     </nav>
   );
-}
+};
 
 export default Navbar;
