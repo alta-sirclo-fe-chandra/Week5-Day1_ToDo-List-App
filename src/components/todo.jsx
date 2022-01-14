@@ -1,7 +1,7 @@
 import { FiEdit } from "react-icons/fi";
 import { IoCheckmarkCircleOutline, IoTrashOutline } from "react-icons/io5";
 
-const todo = (props) => {
+const Todo = (props) => {
   return (
     <div className="row justify-content-end align-items-center py-2 border-bottom">
       <div className="col-md-10">
@@ -48,4 +48,4 @@ const todo = (props) => {
   );
 };
 
-export default todo;
+export default Todo;

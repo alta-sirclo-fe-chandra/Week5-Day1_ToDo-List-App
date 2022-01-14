@@ -1,24 +1,25 @@
 import axios from "axios";
+import moment from "moment";
 import { BsPlusCircle } from "react-icons/bs";
-import Moment from "react-moment";
-import Todo from "../../components/todo";
-import Form from "../../components/form";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import Todo from "../../components/todo";
+import Form from "../../components/form";
 
-const Index = (props) => {
+const Index = () => {
   const [isReady, setIsReady] = useState(false);
   const [inputTask, setInputTask] = useState("");
   const [inputDesc, setInputDesc] = useState("");
   const [todo, setTodo] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [selected, setSelected] = useState({});
-  const currentDateTime = Date().toLocaleString();
+  const searchValue = useSelector((state) => state.search);
   const navigate = useNavigate();
 
   useEffect(() => {
-    props.searchValue !== "" ? requestSearch(props.searchValue) : fetchData();
-  }, [props.searchValue]);
+    searchValue !== "" ? requestSearch(searchValue) : fetchData();
+  }, [searchValue]);
 
   const fetchData = async () => {
     setIsReady(false);
@@ -124,11 +125,11 @@ const Index = (props) => {
     <div id="index">
       <div className="container p-lg-4 py-4 mb-5">
         <h1 className="fs-4 fw-bolder">Today</h1>
-        <p className="my-3 text-muted">
-          <Moment format="LL" element="small">
-            {currentDateTime}
-          </Moment>
-        </p>
+        <div className="mb-3">
+          <small className="text-muted">
+            {moment().format("MMMM Do YYYY")}
+          </small>
+        </div>
         {isReady ? (
           todo.map((item) => (
             <Todo
@@ -147,7 +148,7 @@ const Index = (props) => {
           ))
         ) : (
           <div className="w-100 d-flex justify-content-center">
-            <div class="lds-ellipsis">
+            <div className="lds-ellipsis">
               <div></div>
               <div></div>
               <div></div>

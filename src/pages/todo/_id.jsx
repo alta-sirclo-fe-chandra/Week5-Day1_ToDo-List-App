@@ -3,7 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { BsCircle } from "react-icons/bs";
 import { FiEdit2 } from "react-icons/fi";
-import Moment from "react-moment";
+import moment from "moment";
 import { useParams } from "react-router-dom";
 import Form from "../../components/form";
 
@@ -75,14 +75,12 @@ const Detail = () => {
               </div>
             </div>
             <div className="d-flex align-items-center justify-content-end py-2">
-              <Moment format="LL" element="small">
-                {data.created}
-              </Moment>
+              <small>{moment(data.created).format("MMMM Do YYYY")}</small>
             </div>
           </div>
         ) : (
           <div className="w-100 d-flex justify-content-center">
-            <div class="lds-ellipsis">
+            <div className="lds-ellipsis">
               <div></div>
               <div></div>
               <div></div>

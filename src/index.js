@@ -1,12 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
+import Routes from "./routes";
+import reportWebVitals from "./reportWebVitals";
+import { Provider } from "react-redux";
+import store from "./utils/store";
 import "./assets/styles/index.css";
 import "./assets/styles/loading.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.js";
-import Routes from "./routes";
-import reportWebVitals from "./reportWebVitals";
 
 // initialize axios
 axios.defaults.baseURL = "https://api.todoist.com/rest/v1";
@@ -16,7 +18,9 @@ axios.defaults.headers = {
 
 ReactDOM.render(
   <React.StrictMode>
-    <Routes />
+    <Provider store={store()}>
+      <Routes />
+    </Provider>
   </React.StrictMode>,
   document.getElementById("root")
 );

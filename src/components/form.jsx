@@ -1,4 +1,4 @@
-const form = (props) => {
+const Form = (props) => {
   return (
     <form onSubmit={props.onSubmit} className="row g-4">
       <div className="col-md-10 d-grid gap-2">
@@ -44,4 +44,4 @@ const form = (props) => {
   );
 };
 
-export default form;
+export default Form;

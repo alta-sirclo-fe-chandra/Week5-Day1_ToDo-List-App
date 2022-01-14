@@ -1,11 +1,11 @@
-import Error404 from "../assets/images/error404.svg";
+import error404 from "../assets/images/error404.svg";
 
-const error404 = () => {
+const Error404 = () => {
   return (
     <div className="vh-100 vw-100 d-flex justify-content-center align-items-center">
-      <img src={Error404} alt="logo" height="200" />
+      <img src={error404} alt="logo" height="200" />
     </div>
   );
 };
 
-export default error404;
+export default Error404;

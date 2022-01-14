@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { BsSearch } from "react-icons/bs";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { reduxAction } from "../utils/action";
 import logo from "../assets/images/logo.svg";
 
-const Navbar = (props) => {
+const Navbar = () => {
   const [data, setData] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    props.requestSearch(data);
+    dispatch(reduxAction("search", data));
     navigate(`/todo`);
   };
 
