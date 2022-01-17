@@ -1,11 +1,19 @@
 import axios from "axios";
 import moment from "moment";
-import { BsPlusCircle } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { RootState } from "../../utils/reducer";
+import { IoAddCircleOutline } from "react-icons/io5";
+import { Image } from "react-bootstrap";
 import Todo from "../../components/todo";
 import Form from "../../components/form";
+
+type item = {
+  id: number;
+  content: string;
+  description: string;
+};
 
 const Index = () => {
   const [isReady, setIsReady] = useState(false);
@@ -13,12 +21,13 @@ const Index = () => {
   const [inputDesc, setInputDesc] = useState("");
   const [todo, setTodo] = useState([]);
   const [editMode, setEditMode] = useState(false);
-  const [selected, setSelected] = useState({});
-  const searchValue = useSelector((state) => state.search);
+  const [selected, setSelected] = useState({ id: 0 });
+  const searchValue = useSelector((state: RootState) => state.search);
   const navigate = useNavigate();
 
   useEffect(() => {
     searchValue !== "" ? requestSearch(searchValue) : fetchData();
+    console.log(searchValue);
   }, [searchValue]);
 
   const fetchData = async () => {
@@ -35,7 +44,7 @@ const Index = () => {
       .finally(() => setIsReady(true));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setIsReady(false);
     const body = {
@@ -54,7 +63,7 @@ const Index = () => {
       });
   };
 
-  const handleDelete = async (item) => {
+  const handleDelete = async (item: item) => {
     setIsReady(false);
     await axios
       .delete(`/tasks/${item.id}`)
@@ -66,7 +75,7 @@ const Index = () => {
       });
   };
 
-  const handleComplete = async (item) => {
+  const handleComplete = async (item: item) => {
     setIsReady(false);
     await axios
       .post(`/tasks/${item.id}/close`)
@@ -80,7 +89,7 @@ const Index = () => {
       });
   };
 
-  const handleEdit = async (e) => {
+  const handleEdit = async (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     setIsReady(false);
     const body = {
@@ -99,18 +108,18 @@ const Index = () => {
       });
   };
 
-  const handleDetail = (item) => {
+  const handleDetail = (item: item) => {
     navigate(`/todo/${item.id}`);
   };
 
-  const requestSearch = async (searchValue) => {
+  const requestSearch = async (searchValue: string) => {
     setIsReady(false);
     await axios
       .get("/tasks")
       .then((res) => {
         const { data } = res;
         const searchRegex = new RegExp(searchValue, "i");
-        const filterRows = data.filter(function (el) {
+        const filterRows = data.filter(function (el: any) {
           return searchRegex.test(el.content);
         });
         setTodo(filterRows);
@@ -131,21 +140,34 @@ const Index = () => {
           </small>
         </div>
         {isReady ? (
-          todo.map((item) => (
-            <Todo
-              key={item.id}
-              task={item.content}
-              onClickDelete={() => handleDelete(item)}
-              onClickComplete={() => handleComplete(item)}
-              onClickEdit={() => {
-                setInputTask(item.content);
-                setInputDesc(item.description);
-                setEditMode(true);
-                setSelected(item);
-              }}
-              onClickDetail={() => handleDetail(item)}
-            />
-          ))
+          todo.length ? (
+            todo.map((item: item) => (
+              <Todo
+                key={item.id}
+                task={item.content}
+                onClickDelete={() => handleDelete(item)}
+                onClickComplete={() => handleComplete(item)}
+                onClickEdit={() => {
+                  setInputTask(item.content);
+                  setInputDesc(item.description);
+                  setEditMode(true);
+                  setSelected(item);
+                }}
+                onClickDetail={() => handleDetail(item)}
+                href={"#collapseExample"}
+              />
+            ))
+          ) : (
+            <div className="text-center">
+              <Image
+                src="https://cdn.worldvectorlogo.com/logos/react-2.svg"
+                className="App-logo"
+                alt="logo"
+                height="100"
+              />
+              <p>Sorry, no result found</p>
+            </div>
+          )
         ) : (
           <div className="w-100 d-flex justify-content-center">
             <div className="lds-ellipsis">
@@ -156,32 +178,39 @@ const Index = () => {
             </div>
           </div>
         )}
-        <div className="d-flex ms-4 align-items-center py-2">
-          <a
-            className="text-decoration-none text-dark fs-5"
-            onClick={() => {
-              setInputTask("");
-              setEditMode(false);
-              setInputDesc("");
-            }}
-            data-bs-toggle="collapse"
-            href="#collapseExample"
-            role="button"
-            aria-expanded="false"
-            aria-controls="collapseExample"
-          >
-            <BsPlusCircle /> <span className="fs-6 ms-3">Add Task</span>
-          </a>
+        <div className="row py-3">
+          <div className="col-12 ps-md-5">
+            <a
+              className="text-decoration-none text-dark fs-5"
+              onClick={() => {
+                setInputTask("");
+                setEditMode(false);
+                setInputDesc("");
+              }}
+              data-bs-toggle="collapse"
+              href="#collapseExample"
+              role="button"
+              aria-expanded="false"
+              aria-controls="collapseExample"
+            >
+              <IoAddCircleOutline className="fs-4" />
+              <span className="fs-6 ms-3">Add Task</span>
+            </a>
+          </div>
         </div>
         <div className="collapse" id="collapseExample">
           <div className="card card-body border-0">
             <Form
               inputTask={inputTask}
               inputDesc={inputDesc}
-              onChangeTask={(e) => setInputTask(e.target.value)}
-              onChangeDesc={(e) => setInputDesc(e.target.value)}
-              onSubmit={(e) => (editMode ? handleEdit(e) : handleSubmit(e))}
-              href={"#collapseExample"}
+              onChangeTask={(e: ChangeEvent<HTMLInputElement>) =>
+                setInputTask(e.target.value)
+              }
+              onChangeDesc={(e: ChangeEvent<HTMLInputElement>) =>
+                setInputDesc(e.target.value)
+              }
+              onSubmit={editMode ? handleEdit : handleSubmit}
+              bsToogle={"#collapseExample"}
             />
           </div>
         </div>

@@ -1,26 +1,31 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
+import { Image } from "react-bootstrap";
 import { BsSearch } from "react-icons/bs";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { reduxAction } from "../utils/action";
-import logo from "../assets/images/logo.svg";
 
 const Navbar = () => {
   const [data, setData] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLElement>) => {
     e.preventDefault();
     dispatch(reduxAction("search", data));
-    navigate(`/todo`);
+    navigate(`/`);
   };
 
   return (
     <nav className="navbar navbar-expand-md navbar-light bg-white">
       <div className="container">
         <a className="navbar-brand fs-3 fw-bold" href="/">
-          <img className="App-logo" src={logo} alt="logo" height="60" />
+          <Image
+            src="https://cdn.worldvectorlogo.com/logos/react-2.svg"
+            className="App-logo me-3"
+            alt="logo"
+            height="60"
+          />
           Todo List App
         </a>
         <button
@@ -43,7 +48,7 @@ const Navbar = () => {
               aria-label="Search"
               onChange={(e) => setData(e.target.value)}
             />
-            <button className="btn">
+            <button className="btn" type="submit">
               <BsSearch />
             </button>
           </form>
